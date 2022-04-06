@@ -55,7 +55,8 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <executions>
+        <!--Linea seguente commentata-->
+        <!-- <executions>
           <execution>
             <id>bash-tests</id>
             <phase>integration-test</phase>
@@ -65,10 +66,11 @@
             <configuration>
               <skip>${skipTests}</skip>
               <workingDirectory>${project.basedir}/src/test/bash</workingDirectory>
+              
               <executable>${project.basedir}/src/test/bash/bk_test.sh</executable>
             </configuration>
           </execution>
-        </executions>
+        </executions> -->
       </plugin>
     </plugins>
   </build>
