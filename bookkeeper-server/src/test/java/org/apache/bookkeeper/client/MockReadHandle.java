@@ -1,0 +1,123 @@
+package org.apache.bookkeeper.client;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.bookkeeper.client.api.LastConfirmedAndEntry;
+import org.apache.bookkeeper.client.api.LedgerEntries;
+import org.apache.bookkeeper.client.api.LedgerEntry;
+import org.apache.bookkeeper.client.api.LedgerMetadata;
+import org.apache.bookkeeper.client.api.ReadHandle;
+import org.apache.bookkeeper.client.impl.LedgerEntriesImpl;
+import org.apache.bookkeeper.client.impl.LedgerEntryImpl;
+
+
+/**
+ * Mock implementation of ReadHandle.
+ */
+@Slf4j
+class MockReadHandle implements ReadHandle {
+    private final MockBookKeeper bk;
+    private final long ledgerId;
+    private final LedgerMetadata metadata;
+    private final List<LedgerEntryImpl> entries;
+
+    MockReadHandle(MockBookKeeper bk, long ledgerId, LedgerMetadata metadata, List<LedgerEntryImpl> entries) {
+        this.bk = bk;
+        this.ledgerId = ledgerId;
+        this.metadata = metadata;
+        this.entries = entries;
+    }
+
+    @Override
+    public CompletableFuture<LedgerEntries> readAsync(long firstEntry, long lastEntry) {
+        CompletableFuture<LedgerEntries> promise = new CompletableFuture<>();
+        if (bk.isStopped()) {
+            promise.completeExceptionally(new BKException.BKClientClosedException());
+            return promise;
+        }
+
+        bk.executor.execute(() -> {
+            if (bk.getProgrammedFailStatus()) {
+                promise.completeExceptionally(BKException.create(bk.failReturnCode));
+                return;
+            } else if (bk.isStopped()) {
+                promise.completeExceptionally(new BKException.BKClientClosedException());
+                return;
+            }
+
+            //log.debug("readEntries: first={} last={} total={}", firstEntry, lastEntry, entries.size());
+            List<LedgerEntry> seq = new ArrayList<>();
+            long entryId = firstEntry;
+            while (entryId <= lastEntry && entryId < entries.size()) {
+                seq.add(entries.get((int) entryId++).duplicate());
+            }
+            //log.debug("Entries read: {}", seq);
+            promise.complete(LedgerEntriesImpl.create(seq));
+        });
+        return promise;
+
+    }
+
+    @Override
+    public CompletableFuture<LedgerEntries> readUnconfirmedAsync(long firstEntry, long lastEntry) {
+        return readAsync(firstEntry, lastEntry);
+    }
+
+    @Override
+    public CompletableFuture<Long> readLastAddConfirmedAsync() {
+        return CompletableFuture.completedFuture(getLastAddConfirmed());
+    }
+
+    @Override
+    public CompletableFuture<Long> tryReadLastAddConfirmedAsync() {
+        return readLastAddConfirmedAsync();
+    }
+
+    @Override
+    public long getLastAddConfirmed() {
+        return entries.get(entries.size() - 1).getEntryId();
+    }
+
+    @Override
+    public long getLength() {
+        long length = 0;
+        for (LedgerEntryImpl entry : entries) {
+            length += entry.getLength();
+        }
+
+        return length;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return metadata.isClosed();
+    }
+
+    @Override
+    public CompletableFuture<LastConfirmedAndEntry> readLastAddConfirmedAndEntryAsync(long entryId,
+                                                                                      long timeOutInMillis,
+                                                                                      boolean parallel) {
+        CompletableFuture<LastConfirmedAndEntry> promise = new CompletableFuture<>();
+        promise.completeExceptionally(new UnsupportedOperationException("Long poll not implemented"));
+        return promise;
+    }
+
+    // Handle interface
+    @Override
+    public long getId() {
+        return ledgerId;
+    }
+
+    @Override
+    public CompletableFuture<Void> closeAsync() {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
+    public LedgerMetadata getLedgerMetadata() {
+        return metadata;
+    }
+}
+
