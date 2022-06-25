@@ -40,7 +40,8 @@ public class ReadEntryTest {
     private static MockBookKeeper bkMock;
     private static List<File> dirs;
     //Seconda iterazione Jacoco
-    private static int maxSizeLogger;
+    private static int maxSizeEntry;
+    private static long numEntries;
 
     public ReadEntryTest(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected) throws Exception {
         configure(ledgerId, entryId, location, isExceptionExpected);
@@ -78,12 +79,32 @@ public class ReadEntryTest {
                 {IdType.MATCHING,       IdType.MATCHING,        IdType.NOT_MATCHING,     true},
                 {IdType.MATCHING,       IdType.MATCHING,        IdType.MATCHING,         false},
                 //Seconda iterazione jacoco
-                {IdType.MATCHING,       IdType.MATCHING,        IdType.OVERSIZE,         true},
+                {IdType.MATCHING,       IdType.OVERSIZE,        IdType.MATCHING,         false},
         });
     }
 
     private void configure(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected){
-        createNewEntry();
+        //createNewEntry();
+        switch(entryId){
+            case INVALID:
+                this.entryId = -1L;
+                createNewEntry();
+                break;
+            case MATCHING:
+                createNewEntry();
+                this.entryId = this.entryIdMatching;
+                break;
+            case NOT_MATCHING:
+                createNewEntry();
+                this.entryId = 1L;
+                break;
+            //Seconda iterazione jacoco
+            case OVERSIZE:
+                createNewEntry(maxSizeEntry);
+                this.entryId = this.entryIdMatching;
+                break;
+        }
+
         switch(ledgerId){
             case INVALID:
                 this.ledgerId = -1L;
@@ -93,18 +114,6 @@ public class ReadEntryTest {
                 break;
             case NOT_MATCHING:
                 this.ledgerId = createNewLedger().getId();
-                break;
-        }
-
-        switch(entryId){
-            case INVALID:
-                this.entryId = -1L;
-                break;
-            case MATCHING:
-                this.entryId = this.entryIdMatching;
-                break;
-            case NOT_MATCHING:
-                this.entryId = 1L;
                 break;
         }
 
@@ -118,9 +127,7 @@ public class ReadEntryTest {
             case NOT_MATCHING:
                 this.location = this.locationMatching+1;
                 break;
-            //Seconda iterazione jacoco
-            case OVERSIZE:
-                this.location = maxSizeLogger;
+
         }
 
         this.isExceptionExpected = isExceptionExpected;
@@ -137,12 +144,14 @@ public class ReadEntryTest {
             dirs.add(curDir);
 
             ServerConfiguration conf = TestBKConfiguration.newServerConfiguration();
-            maxSizeLogger = conf.getNettyMaxFrameSizeBytes();
+            maxSizeEntry = conf.getNettyMaxFrameSizeBytes();
             entryLogger = new EntryLogger(conf, new LedgerDirsManager(conf, new File[]{rootDir},new DiskChecker(
                     conf.getDiskUsageThreshold(),
                     conf.getDiskUsageWarnThreshold())));
 
             bkMock = new MockBookKeeper(null);
+
+            numEntries = 0L;
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
@@ -160,13 +169,21 @@ public class ReadEntryTest {
     }
 
     private void createNewEntry(){
+        createNewEntry(4);
+    }
+
+    private void createNewEntry(int dataSize){
         try {
             LedgerHandle lh =  createNewLedger();
             this.ledgerIdMatching = lh.getId();
             // test data
-            this.expectedValue = "test".getBytes();
-            int entrySize = HEADER_SIZE + this.expectedValue.length;
-            this.entryIdMatching = 0L;
+            byte[] data = new byte[dataSize];
+            new Random().nextBytes(data);
+            this.expectedValue = data;
+
+            int entrySize = HEADER_SIZE + dataSize;
+            this.entryIdMatching = numEntries;
+            numEntries++;
 
             ByteBuf entry = Unpooled.buffer(entrySize);
             entry.writeLong(this.ledgerIdMatching);
