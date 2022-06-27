@@ -14,12 +14,16 @@ import org.apache.commons.io.FileUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.mockito.Mockito.*;
 
 
 @RunWith(value= Parameterized.class)
@@ -37,13 +41,14 @@ public class ReadEntryTest {
     private long entryIdMatching;
     private long locationMatching;
     private static EntryLogger entryLogger;
-    private static MockBookKeeper bkMock;
     private static List<File> dirs;
     //Seconda iterazione Jacoco
     private static int maxSizeEntry;
     private static long numEntries;
 
-    public ReadEntryTest(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected) throws Exception {
+    static LedgerHandle ledgerHandle;
+
+    public ReadEntryTest(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected) {
         configure(ledgerId, entryId, location, isExceptionExpected);
     }
 
@@ -96,7 +101,7 @@ public class ReadEntryTest {
                 break;
             case NOT_MATCHING:
                 createNewEntry();
-                this.entryId = 1L;
+                this.entryId = ThreadLocalRandom.current().nextLong(123456789L);
                 break;
             //Seconda iterazione jacoco
             case OVERSIZE:
@@ -113,7 +118,7 @@ public class ReadEntryTest {
                 this.ledgerId = this.ledgerIdMatching;
                 break;
             case NOT_MATCHING:
-                this.ledgerId = createNewLedger().getId();
+                this.ledgerId = ledgerHandle.getId();
                 break;
         }
 
@@ -127,7 +132,6 @@ public class ReadEntryTest {
             case NOT_MATCHING:
                 this.location = this.locationMatching+1;
                 break;
-
         }
 
         this.isExceptionExpected = isExceptionExpected;
@@ -149,23 +153,18 @@ public class ReadEntryTest {
                     conf.getDiskUsageThreshold(),
                     conf.getDiskUsageWarnThreshold())));
 
-            bkMock = new MockBookKeeper(null);
-
+            ledgerHandle = mock(LedgerHandle.class);
+            when(ledgerHandle.getId()).thenAnswer(new Answer<Long>() {
+                @Override
+                public Long answer(InvocationOnMock invocation) throws Throwable {
+                    return ThreadLocalRandom.current().nextLong(123456789L);
+                }
+            });
             numEntries = 0L;
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
         }
-    }
-
-    private LedgerHandle createNewLedger(){
-        LedgerHandle lh = null;
-        try {
-            lh = bkMock.createLedger(BookKeeper.DigestType.MAC, "test".getBytes(StandardCharsets.UTF_8));
-        } catch (BKException e) {
-            e.printStackTrace();
-        }
-        return lh;
     }
 
     private void createNewEntry(){
@@ -174,8 +173,7 @@ public class ReadEntryTest {
 
     private void createNewEntry(int dataSize){
         try {
-            LedgerHandle lh =  createNewLedger();
-            this.ledgerIdMatching = lh.getId();
+            this.ledgerIdMatching = ledgerHandle.getId();
             // test data
             byte[] data = new byte[dataSize];
             new Random().nextBytes(data);
@@ -191,7 +189,6 @@ public class ReadEntryTest {
             entry.writeInt(entrySize);
             entry.writeBytes(this.expectedValue);
 
-            lh.addEntry(entry.array());
             this.locationMatching = entryLogger.addEntry(this.ledgerIdMatching,entry,true);
 
         }catch (Exception e) {
@@ -230,11 +227,10 @@ public class ReadEntryTest {
     public static void tearDown(){
         try {
             entryLogger.shutdown();
-            bkMock.close();
             for(File dir: dirs){
                 FileUtils.deleteDirectory(dir);
             }
-        } catch (IOException | BKException | InterruptedException e) {
+        } catch (IOException  e) {
             e.printStackTrace();
             //Assert.fail();
         }finally {
