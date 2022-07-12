@@ -125,6 +125,33 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4-rule</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-classloading-xstream</artifactId>
+      <version>${powermock.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-api-mockito2</artifactId>
+      <version>${powermock.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.powermock</groupId>
+      <artifactId>powermock-module-junit4</artifactId>
+      <version>${powermock.version}</version>
+    </dependency>
+    <dependency>
         <groupId>org.apache.kerby</groupId>
         <artifactId>kerby-config</artifactId>
         <version>${kerby.version}</version>
@@ -395,7 +422,7 @@
       </build>
     </profile>
     <profile>
-      <id>mutation-testing</id>
+      <id>mutation-coverage</id>
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
@@ -411,15 +438,10 @@
             <version>${pitest.version}</version>
             <configuration>
               <targetClasses>
-                <param>org.apache.bookkeeper.proto.PerChannelBookieClient</param>
-                <param>org.apache.bookkeeper.bookie.Journal</param>
+                <param>org.apache.bookkeeper.bookie.EntryLogger</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.bookkeeper.proto.PerChannelBookieTest</param>
-                <param>org.apache.bookkeeper.proto.PerChannelBookieBisTest</param>
-                <param>org.apache.bookkeeper.proto.PerChannelBookieTrisTest</param>
-                <param>org.apache.bookkeeper.bookie.JournalTest</param>
-                <param>org.apache.bookkeeper.bookie.JournalBisTest</param>
+                <param>org.apache.bookkeeper.ReadEntryTest</param>
               </targetTests>
               <avoidCallsTo>
                 <avoidCallsTo>org.slf4j</avoidCallsTo>

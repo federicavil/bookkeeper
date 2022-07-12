@@ -983,7 +983,7 @@ public class LedgerHandle implements WriteHandle {
      */
     public long addEntry(final long entryId, byte[] data, int offset, int length) throws InterruptedException,
             BKException {
-        LOG.error("To use this feature Ledger must be created with createLedgerAdv() interface.");
+        LOG.error("To use this feature Ledger must be created with createLedgferAdv() interface.");
         throw BKException.create(BKException.Code.IllegalOpException);
     }
 

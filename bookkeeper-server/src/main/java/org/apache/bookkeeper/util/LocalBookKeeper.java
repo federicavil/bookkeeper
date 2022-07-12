@@ -255,7 +255,7 @@ public class LocalBookKeeper {
 
             // write config into file before start so we can know what's wrong if start failed
             String fileName = Bookie.getBookieId(bsConfs[i]).toString() + ".conf";
-            serializeLocalBookieConfig(bsConfs[i], fileName);
+            //serializeLocalBookieConfig(bsConfs[i], fileName);
 
             // Mimic BookKeeper Main
             final ComponentInfoPublisher componentInfoPublisher = new ComponentInfoPublisher();

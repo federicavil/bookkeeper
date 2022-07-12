@@ -2,7 +2,9 @@ package org.apache.bookkeeper;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.util.concurrent.FastThreadLocal;
 import org.apache.bookkeeper.bookie.Bookie;
+import org.apache.bookkeeper.bookie.BufferedReadChannel;
 import org.apache.bookkeeper.bookie.EntryLogger;
 import org.apache.bookkeeper.bookie.LedgerDirsManager;
 import org.apache.bookkeeper.client.*;
@@ -14,6 +16,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -26,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(value= Parameterized.class)
+@RunWith(value = Parameterized.class)
 public class ReadEntryTest {
 
     private final int HEADER_SIZE = 2*(Long.BYTES) + (Integer.BYTES); //ledgerIdSize, EntryIdSize, Length
@@ -47,6 +51,7 @@ public class ReadEntryTest {
     private static long numEntries;
 
     static LedgerHandle ledgerHandle;
+
 
     public ReadEntryTest(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected) {
         configure(ledgerId, entryId, location, isExceptionExpected);
@@ -84,11 +89,14 @@ public class ReadEntryTest {
                 {IdType.MATCHING,       IdType.MATCHING,        IdType.NOT_MATCHING,     true},
                 {IdType.MATCHING,       IdType.MATCHING,        IdType.MATCHING,         false},
                 //Seconda iterazione jacoco
-                {IdType.MATCHING,       IdType.OVERSIZE,        IdType.MATCHING,         false},
+                //{IdType.MATCHING,       IdType.OVERSIZE,        IdType.MATCHING,         false},
+                //Terza iterazione Ba-Dua
+
+
         });
     }
 
-    private void configure(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected){
+    private void configure(IdType ledgerId, IdType entryId, IdType location, boolean isExceptionExpected) {
         //createNewEntry();
         switch(entryId){
             case INVALID:
@@ -138,23 +146,26 @@ public class ReadEntryTest {
     }
 
     @BeforeClass
-    public static void setUpBookkeeper(){
+    public static void setUp(){
         try {
+
             File rootDir = IOUtils.createTempDir("readEntryTest",".dir");
             File curDir = Bookie.getCurrentDirectory(rootDir);
             Bookie.checkDirectoryStructure(curDir);
+
             dirs = new ArrayList<>();
             dirs.add(rootDir);
             dirs.add(curDir);
 
             ServerConfiguration conf = TestBKConfiguration.newServerConfiguration();
             maxSizeEntry = conf.getNettyMaxFrameSizeBytes();
+
             entryLogger = new EntryLogger(conf, new LedgerDirsManager(conf, new File[]{rootDir},new DiskChecker(
                     conf.getDiskUsageThreshold(),
                     conf.getDiskUsageWarnThreshold())));
 
-            ledgerHandle = mock(LedgerHandle.class);
-            when(ledgerHandle.getId()).thenAnswer(new Answer<Long>() {
+            ledgerHandle = Mockito.mock(LedgerHandle.class);
+            Mockito.when(ledgerHandle.getId()).thenAnswer(new Answer<Long>() {
                 @Override
                 public Long answer(InvocationOnMock invocation) throws Throwable {
                     return ThreadLocalRandom.current().nextLong(123456789L);
@@ -226,7 +237,7 @@ public class ReadEntryTest {
     @AfterClass
     public static void tearDown(){
         try {
-            entryLogger.shutdown();
+            //entryLogger.shutdown();
             for(File dir: dirs){
                 FileUtils.deleteDirectory(dir);
             }
