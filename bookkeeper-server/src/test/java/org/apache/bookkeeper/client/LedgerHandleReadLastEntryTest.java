@@ -11,14 +11,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class LedgerHandleReadLastEntryTest {
+public class LedgerHandleReadLastEntryTest extends LedgerHandleTest{
 
     private Object[][] entries;
 
-    private static LedgerHandle ledgerHandle;
-    private static Thread localBookkeeper;
-
     public LedgerHandleReadLastEntryTest(Object[][] entries){
+        super(false);
         configure(entries);
     }
 
@@ -69,44 +67,15 @@ public class LedgerHandleReadLastEntryTest {
         });
     }
 
-    @BeforeClass
-    public static void createLedgerHandle(){
-        boolean connected = false;
-        localBookkeeper = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ServerConfiguration conf = new ServerConfiguration();
-                    conf.setAllowLoopback(true);
-                    LocalBookKeeper.startLocalBookies("127.0.0.1",2181,1,true,5000,conf);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        localBookkeeper.start();
-        while(!connected){
-            try{
-                Thread.sleep(1000);
-                BookKeeper bk = new BookKeeper("127.0.0.1:2181");
-                ledgerHandle = bk.createLedger(1,1,1,BookKeeper.DigestType.MAC,"test".getBytes(StandardCharsets.UTF_8));
-                connected = true;
-
-            } catch (Exception e) {
-                //e.printStackTrace();
-            }
-        }
-    }
 
     @Before
     public void ledgerConfiguration(){
         if(entries.length > 0){
-            Object[] toAdd = entries[entries.length-1];
             try {
-                ledgerHandle.addEntry((byte[]) toAdd[0], (Integer) toAdd[1],(Integer) toAdd[2]);
+                for(Object[] toAdd : entries)
+                    ledgerHandle.addEntry((byte[]) toAdd[0], (Integer) toAdd[1],(Integer) toAdd[2]);
             } catch (InterruptedException | BKException e) {
                 e.printStackTrace();
-                Assert.fail();
             }
         }
     }
@@ -129,13 +98,4 @@ public class LedgerHandleReadLastEntryTest {
         }
     }
 
-    @AfterClass
-    public static void shutDown(){
-        try {
-            ledgerHandle.close();
-        } catch (InterruptedException | BKException e) {
-            e.printStackTrace();
-        }
-        localBookkeeper.interrupt();
-    }
 }

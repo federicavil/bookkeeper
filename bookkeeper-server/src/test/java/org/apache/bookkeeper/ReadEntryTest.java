@@ -2,22 +2,18 @@ package org.apache.bookkeeper;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.util.concurrent.FastThreadLocal;
 import org.apache.bookkeeper.bookie.Bookie;
-import org.apache.bookkeeper.bookie.BufferedReadChannel;
 import org.apache.bookkeeper.bookie.EntryLogger;
 import org.apache.bookkeeper.bookie.LedgerDirsManager;
 import org.apache.bookkeeper.client.*;
 import org.apache.bookkeeper.conf.ServerConfiguration;
 import org.apache.bookkeeper.util.DiskChecker;
 import org.apache.bookkeeper.util.IOUtils;
-import org.apache.bookkeeper.utils.TestBKConfiguration;
-import org.apache.commons.io.FileUtils;
+import org.apache.bookkeeper.conf.TestBKConfiguration;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -26,8 +22,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static org.mockito.Mockito.*;
 
 
 @RunWith(value = Parameterized.class)
@@ -233,7 +227,7 @@ public class ReadEntryTest {
             Assert.assertEquals(expected,actual);
         }
     }
-
+    /*
     @AfterClass
     public static void tearDown(){
         try {
@@ -248,7 +242,7 @@ public class ReadEntryTest {
             dirs.clear();
         }
     }
-
+*/
     private enum IdType{
         INVALID,
         MATCHING,

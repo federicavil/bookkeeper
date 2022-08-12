@@ -11,21 +11,19 @@ import java.util.*;
 
 
 @RunWith(Parameterized.class)
-public class LedgerHandleReadEntriesTest{
+public class LedgerHandleReadEntriesTest extends LedgerHandleTest {
 
     private long firstEntry;
     private long lastEntry;
     private boolean isExceptionExpected;
 
-    private static List<Long> entryIds = new ArrayList<>();
-    private static List<byte[]> entryDatas = new ArrayList<>();
+    private List<Long> entryIds;
+    private List<byte[]> entryDatas;
     private static final int N = 4;
     private static final int dataSize = 10;
 
-    private static LedgerHandle ledgerHandle;
-    private static Thread localBookkeeper;
-
     public LedgerHandleReadEntriesTest(long firstEntry, long lastEntry, boolean isExceptionExpected){
+        super(false);
        configure(firstEntry,lastEntry,isExceptionExpected);
     }
 
@@ -55,33 +53,46 @@ public class LedgerHandleReadEntriesTest{
     }
 
 
-    @BeforeClass
-    public static void addEntries(){
-        boolean connected = false;
-        localBookkeeper = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ServerConfiguration conf = new ServerConfiguration();
-                    conf.setAllowLoopback(true);
-                    LocalBookKeeper.startLocalBookies("127.0.0.1",2181,1,true,5000,conf);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        localBookkeeper.start();
-        while(!connected){
-            try{
-                Thread.sleep(1000);
-                BookKeeper bk = new BookKeeper("127.0.0.1:2181");
-                ledgerHandle = bk.createLedger(1,1,1,BookKeeper.DigestType.MAC,"test".getBytes(StandardCharsets.UTF_8));
-                connected = true;
-
-            } catch (Exception e) {
-                //e.printStackTrace();
-            }
-        }
+    @Before
+    public void addEntries(){
+//        boolean connected = false;
+//        localBookkeeper = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    ServerConfiguration conf = new ServerConfiguration();
+//                    conf.setAllowLoopback(true);
+//                    LocalBookKeeper.startLocalBookies("127.0.0.1",2181,1,false,5000,conf);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//        try {
+//            Thread.sleep(20000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        localBookkeeper.start();
+//        while(!connected){
+//            try{
+//                Thread.sleep(40000);
+//                BookKeeper bk = new BookKeeper("127.0.0.1:2181");
+//                ledgerHandle = bk.createLedger(1,1,1,BookKeeper.DigestType.MAC,"test".getBytes(StandardCharsets.UTF_8));
+//                connected = true;
+//
+//            } catch (Exception e) {
+//                //e.printStackTrace();
+//            }
+//        }
+//        BookKeeper bk = BookkeeperInstance.getBookkeeperInstance();
+//        try {
+//            ledgerHandle = bk.createLedger(1,1,1,BookKeeper.DigestType.MAC,"test".getBytes(StandardCharsets.UTF_8));
+//        } catch (InterruptedException | BKException e) {
+//            e.printStackTrace();
+//        }
+        entryIds = new ArrayList<>();
+        entryDatas = new ArrayList<>();
         for (int i = 0; i < N; i++) {
             byte[] data = new byte[dataSize];
             new Random().nextBytes(data);
@@ -134,13 +145,6 @@ public class LedgerHandleReadEntriesTest{
         }
 
     }
-    @AfterClass
-    public static void shutDown(){
-        try {
-            ledgerHandle.close();
-        } catch (InterruptedException | BKException e) {
-            e.printStackTrace();
-        }
-        localBookkeeper.interrupt();
-    }
+
+
 }

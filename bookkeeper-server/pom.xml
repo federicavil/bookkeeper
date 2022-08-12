@@ -124,33 +124,7 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-module-junit4-rule</artifactId>
-      <version>${powermock.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-classloading-xstream</artifactId>
-      <version>${powermock.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>${mockito.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito2</artifactId>
-      <version>${powermock.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.powermock</groupId>
-      <artifactId>powermock-module-junit4</artifactId>
-      <version>${powermock.version}</version>
-    </dependency>
+
     <dependency>
         <groupId>org.apache.kerby</groupId>
         <artifactId>kerby-config</artifactId>
@@ -254,6 +228,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <reuseForks>true</reuseForks>
+          <forkCount>1</forkCount>
+          <runOrder>random</runOrder>
+        </configuration>
 <!--        <configuration>-->
 <!--          <trimStackTrace>false</trimStackTrace>-->
 <!--          <properties>-->
@@ -438,10 +417,14 @@
             <version>${pitest.version}</version>
             <configuration>
               <targetClasses>
-                <param>org.apache.bookkeeper.bookie.EntryLogger</param>
+<!--                <param>org.apache.bookkeeper.bookie.EntryLogger</param>-->
+                <param>org.apache.bookkeeper.client.LedgerHandle</param>
               </targetClasses>
               <targetTests>
-                <param>org.apache.bookkeeper.ReadEntryTest</param>
+<!--                <param>org.apache.bookkeeper.ReadEntryTest</param>-->
+                <param>org.apache.bookkeeper.client.LedgerHandleAddEntryTest</param>
+                <param>org.apache.bookkeeper.client.LedgerHandleReadEntriesTest</param>
+                <param>org.apache.bookkeeper.client.LedgerHandleReadLastEntryTest</param>
               </targetTests>
               <avoidCallsTo>
                 <avoidCallsTo>org.slf4j</avoidCallsTo>

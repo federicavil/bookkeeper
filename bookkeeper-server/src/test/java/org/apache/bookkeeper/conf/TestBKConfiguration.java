@@ -1,4 +1,4 @@
-package org.apache.bookkeeper.utils;
+package org.apache.bookkeeper.conf;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -7,8 +7,6 @@ import java.util.Enumeration;
 
 import org.apache.bookkeeper.bookie.storage.ldb.DbLedgerStorage;
 import org.apache.bookkeeper.common.allocator.PoolingPolicy;
-import org.apache.bookkeeper.conf.ClientConfiguration;
-import org.apache.bookkeeper.conf.ServerConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
