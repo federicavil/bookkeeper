@@ -1,10 +1,7 @@
-package org.apache.bookkeeper;
+package org.apache.bookkeeper.bookie;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.apache.bookkeeper.bookie.Bookie;
-import org.apache.bookkeeper.bookie.EntryLogger;
-import org.apache.bookkeeper.bookie.LedgerDirsManager;
 import org.apache.bookkeeper.client.*;
 import org.apache.bookkeeper.conf.ServerConfiguration;
 import org.apache.bookkeeper.util.DiskChecker;
@@ -83,7 +80,7 @@ public class ReadEntryTest {
                 {IdType.MATCHING,       IdType.MATCHING,        IdType.NOT_MATCHING,     true},
                 {IdType.MATCHING,       IdType.MATCHING,        IdType.MATCHING,         false},
                 //Seconda iterazione jacoco
-                //{IdType.MATCHING,       IdType.OVERSIZE,        IdType.MATCHING,         false},
+                {IdType.MATCHING,       IdType.OVERSIZE,        IdType.MATCHING,         false},
                 //Terza iterazione Ba-Dua
 
 

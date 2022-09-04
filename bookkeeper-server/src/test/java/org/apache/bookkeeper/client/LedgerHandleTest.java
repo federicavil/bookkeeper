@@ -10,11 +10,9 @@ public class LedgerHandleTest extends BookKeeperClusterTestCase {
 
     private static final int BOOKIES = 1;
     protected LedgerHandle ledgerHandle;
-    protected boolean isLedgerHandleClosed;
 
-    public LedgerHandleTest(boolean isLedgerHandleClosed){
+    public LedgerHandleTest(){
         super(BOOKIES);
-        this.isLedgerHandleClosed = isLedgerHandleClosed;
     }
 
     @Before
@@ -24,21 +22,21 @@ public class LedgerHandleTest extends BookKeeperClusterTestCase {
         } catch (BKException | InterruptedException | RuntimeException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void closeLedgerHandle(){
         //Iterazione Jacoco
-        if(isLedgerHandleClosed){
-            try {
-                ledgerHandle.close();
-            } catch (InterruptedException | BKException e) {
-                e.printStackTrace();
-            }
+        try {
+            ledgerHandle.close();
+        } catch (InterruptedException | BKException e) {
+            e.printStackTrace();
         }
+
     }
 
 //    @After
 //    public void shutDown(){
 //        try {
-//            if(!isLedgerHandleClosed)
-//                ledgerHandle.close();
 //            bkc.close();
 //        } catch (InterruptedException | BKException e) {
 //            e.printStackTrace();

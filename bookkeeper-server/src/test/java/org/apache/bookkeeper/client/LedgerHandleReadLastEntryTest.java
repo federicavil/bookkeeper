@@ -1,7 +1,5 @@
 package org.apache.bookkeeper.client;
 
-import org.apache.bookkeeper.conf.ServerConfiguration;
-import org.apache.bookkeeper.util.LocalBookKeeper;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -16,7 +14,7 @@ public class LedgerHandleReadLastEntryTest extends LedgerHandleTest{
     private Object[][] entries;
 
     public LedgerHandleReadLastEntryTest(Object[][] entries){
-        super(false);
+        super();
         configure(entries);
     }
 
@@ -63,10 +61,9 @@ public class LedgerHandleReadLastEntryTest extends LedgerHandleTest{
                         {"test".getBytes(StandardCharsets.UTF_8),  3,  0},
                         {"test".getBytes(StandardCharsets.UTF_8),  3,  1}
 
-                }}
+                }},
         });
     }
-
 
     @Before
     public void ledgerConfiguration(){
