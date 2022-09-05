@@ -34,14 +34,14 @@ public class LedgerHandleTest extends BookKeeperClusterTestCase {
 
     }
 
-//    @After
-//    public void shutDown(){
-//        try {
-//            bkc.close();
-//        } catch (InterruptedException | BKException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @After
+    public void shutDown(){
+        try {
+            bkc.close();
+        } catch (InterruptedException | BKException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

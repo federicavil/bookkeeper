@@ -466,11 +466,11 @@
             <configuration>
               <verbose>true</verbose>
               <targetClasses>
-<!--                <param>org.apache.bookkeeper.bookie.EntryLogger</param>-->
+                <param>org.apache.bookkeeper.bookie.EntryLogger</param>
                 <param>org.apache.bookkeeper.client.LedgerHandle</param>
               </targetClasses>
               <targetTests>
-<!--                <param>org.apache.bookkeeper.bookie.ReadEntryTest</param>-->
+                <param>org.apache.bookkeeper.bookie.EntryLoggerReadEntryTest</param>
                 <param>org.apache.bookkeeper.client.LedgerHandleAddEntryTest</param>
                 <param>org.apache.bookkeeper.client.LedgerHandleReadEntriesTest</param>
                 <param>org.apache.bookkeeper.client.LedgerHandleReadLastEntryTest</param>
